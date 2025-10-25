@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Post } from '@/lib/supabase'
 import { addReaction, ReactionType } from '@/lib/api/reactions'
+import { getCurrentUser } from '@/lib/auth'
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale/ko'
 
@@ -14,6 +15,22 @@ interface PostCardProps {
 
 export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
   const [isReacting, setIsReacting] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadCurrentUser()
+  }, [])
+
+  async function loadCurrentUser() {
+    try {
+      const user = await getCurrentUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    } catch (error) {
+      console.error('Failed to load current user:', error)
+    }
+  }
 
   async function handleReaction(type: ReactionType) {
     if (isReacting) return
@@ -60,11 +77,22 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
             </p>
           </div>
         </div>
-        {post.church && (
-          <span className="text-xs px-2 py-1 bg-primary-100 text-primary-700 rounded-full">
-            {post.church.name}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {post.church && (
+            <span className="text-xs px-2 py-1 bg-primary-100 text-primary-700 rounded-full">
+              {post.church.name}
+            </span>
+          )}
+          {currentUserId === post.author_id && (
+            <Link
+              href={`/posts/${post.id}/edit`}
+              className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              수정
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Content */}

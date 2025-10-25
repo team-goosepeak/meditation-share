@@ -77,7 +77,14 @@ export async function getUserChurches(userId: string): Promise<Church[]> {
     .eq('user_id', userId)
 
   if (error) throw error
-  return (data?.map(item => item.church).filter(Boolean) || []) as Church[]
+  
+  // Extract churches from the nested structure
+  const churches = data?.map(item => {
+    const church = item.church as unknown as Church
+    return church
+  }).filter(Boolean) || []
+  
+  return churches
 }
 
 export async function joinChurch(joinCode: string) {

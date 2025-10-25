@@ -1,16 +1,22 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Layout from '@/components/Layout'
-import { createPost } from '@/lib/api/posts'
+import { getPost, updatePost } from '@/lib/api/posts'
 import { getUserChurches } from '@/lib/api/churches'
 import { getCurrentUser } from '@/lib/auth'
-import { Church, Scripture } from '@/lib/supabase'
+import { Church, Scripture, Post } from '@/lib/supabase'
 import { getBibleVerses, getAllBookNames, type BibleBookName, type BibleVerse } from '@/lib/api/bible'
 
-export default function NewPostPage() {
+export default function EditPostPage() {
   const router = useRouter()
+  const params = useParams()
+  const postId = params.id as string
+
+  const [post, setPost] = useState<Post | null>(null)
+  const [isLoadingPost, setIsLoadingPost] = useState(true)
+  
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
   const [scriptures, setScriptures] = useState<Scripture[]>([])
@@ -19,7 +25,7 @@ export default function NewPostPage() {
   const [visibility, setVisibility] = useState<'public' | 'church' | 'friends' | 'private'>('public')
   const [selectedChurch, setSelectedChurch] = useState<string>('')
   const [churches, setChurches] = useState<Church[]>([])
-  const [sermonDate, setSermonDate] = useState(new Date().toISOString().split('T')[0])
+  const [sermonDate, setSermonDate] = useState('')
   const [sermonLocation, setSermonLocation] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
@@ -44,20 +50,52 @@ export default function NewPostPage() {
       if (user) {
         const userChurches = await getUserChurches(user.id)
         setChurches(userChurches)
-        
-        // 예배 장소 기본값 설정: 첫 번째 교회명
-        if (userChurches.length > 0 && !sermonLocation) {
-          setSermonLocation(userChurches[0].name)
-        }
       }
     } catch (error) {
       console.error('Failed to load churches:', error)
     }
-  }, [sermonLocation])
+  }, [])
 
   useEffect(() => {
+    loadPost()
     loadChurches()
-  }, [loadChurches])
+  }, [postId, loadChurches])
+
+  async function loadPost() {
+    setIsLoadingPost(true)
+    try {
+      const user = await getCurrentUser()
+      if (!user) {
+        router.push('/auth/login')
+        return
+      }
+
+      const postData = await getPost(postId)
+      
+      // 작성자 확인
+      if (postData.author_id !== user.id) {
+        alert('자신의 글만 수정할 수 있습니다.')
+        router.push(`/posts/${postId}`)
+        return
+      }
+
+      setPost(postData)
+      setTitle(postData.title)
+      setBody(postData.body)
+      setScriptures(postData.scriptures || [])
+      setTags(postData.tags || [])
+      setVisibility(postData.visibility)
+      setSelectedChurch(postData.church_id || '')
+      setSermonDate(postData.sermon_date || '')
+      setSermonLocation(postData.sermon_location || '')
+    } catch (error) {
+      console.error('Failed to load post:', error)
+      alert('포스트를 불러올 수 없습니다.')
+      router.push('/feed')
+    } finally {
+      setIsLoadingPost(false)
+    }
+  }
 
   async function previewScripture() {
     if (!scriptureBook || !scriptureChapter || !scriptureVerseFrom) {
@@ -108,7 +146,6 @@ export default function NewPostPage() {
 
     setScriptures([...scriptures, newScripture])
     
-    // 입력 필드 초기화
     setScriptureBook('')
     setScriptureChapter('')
     setScriptureVerseFrom('')
@@ -177,31 +214,45 @@ export default function NewPostPage() {
     setIsLoading(true)
 
     try {
-      await createPost({
+      await updatePost(postId, {
         title: title.trim(),
         body: body.trim(),
         scriptures,
         tags,
         visibility,
-        churchId: selectedChurch || undefined,
-        sermonDate: sermonDate || undefined,
-        sermonLocation: sermonLocation || undefined,
+        sermon_date: sermonDate || undefined,
+        sermon_location: sermonLocation || undefined,
       })
 
-      router.push('/feed')
+      router.push(`/posts/${postId}`)
     } catch (error) {
-      console.error('Failed to create post:', error)
-      alert('게시물 작성에 실패했습니다')
+      console.error('Failed to update post:', error)
+      alert('게시물 수정에 실패했습니다')
     } finally {
       setIsLoading(false)
     }
+  }
+
+  if (isLoadingPost) {
+    return (
+      <Layout>
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">로딩 중...</p>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (!post) {
+    return null
   }
 
   return (
     <Layout>
       <div className="max-w-3xl mx-auto">
         <div className="card p-8">
-          <h1 className="text-2xl font-bold mb-6">새 묵상 작성</h1>
+          <h1 className="text-2xl font-bold mb-6">묵상 수정</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Title */}
@@ -254,10 +305,9 @@ export default function NewPostPage() {
 
               <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                  {/* 책 선택 */}
                   <div className="md:col-span-4">
                     <label className="block text-xs text-gray-600 mb-1">
-                      성경책 *
+                      성경책
                     </label>
                     <select
                       value={scriptureBook}
@@ -277,10 +327,9 @@ export default function NewPostPage() {
                     </select>
                   </div>
 
-                  {/* 장 입력 */}
                   <div className="md:col-span-2">
                     <label className="block text-xs text-gray-600 mb-1">
-                      장 *
+                      장
                     </label>
                     <input
                       type="number"
@@ -296,10 +345,9 @@ export default function NewPostPage() {
                     />
                   </div>
 
-                  {/* 시작 절 */}
                   <div className="md:col-span-2">
                     <label className="block text-xs text-gray-600 mb-1">
-                      시작 절 *
+                      시작 절
                     </label>
                     <input
                       type="number"
@@ -315,10 +363,9 @@ export default function NewPostPage() {
                     />
                   </div>
 
-                  {/* 끝 절 (선택) */}
                   <div className="md:col-span-2">
                     <label className="block text-xs text-gray-600 mb-1">
-                      끝 절 (선택)
+                      끝 절
                     </label>
                     <input
                       type="number"
@@ -334,7 +381,6 @@ export default function NewPostPage() {
                     />
                   </div>
 
-                  {/* 미리보기 버튼 */}
                   <div className="md:col-span-2 flex items-end">
                     <button
                       type="button"
@@ -347,19 +393,12 @@ export default function NewPostPage() {
                   </div>
                 </div>
 
-                {/* 도움말 */}
-                <p className="mt-2 text-xs text-gray-500">
-                  💡 예시: 요한복음 3장 16절 또는 창세기 1장 1-3절
-                </p>
-
-                {/* 에러 메시지 */}
                 {verseError && (
                   <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                     <p className="text-sm text-red-600">{verseError}</p>
                   </div>
                 )}
 
-                {/* 미리보기 결과 */}
                 {previewVerses && (
                   <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-start justify-between mb-2">
@@ -386,7 +425,6 @@ export default function NewPostPage() {
                 )}
               </div>
 
-              {/* 추가된 성경 구절 목록 */}
               {scriptures.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700 mb-2">
@@ -474,21 +512,19 @@ export default function NewPostPage() {
                 </>
               ) : (
                 <div className="space-y-4">
-                  {/* AI Notes Input */}
                   <div>
                     <textarea
                       value={aiNotes}
                       onChange={(e) => setAiNotes(e.target.value)}
                       className="input-field"
                       rows={6}
-                      placeholder="묵상하면서 떠오른 생각들을 간략하게 메모해주세요...&#10;&#10;예시:&#10;- 사랑은 행동이다&#10;- 말만 하는게 아니라 실천해야 함&#10;- 이번주에 가족에게 더 친절하게 대하기&#10;- 주님의 사랑을 본받자"
+                      placeholder="묵상하면서 떠오른 생각들을 간략하게 메모해주세요..."
                     />
                     <p className="mt-2 text-sm text-gray-500">
                       💡 간단한 키워드나 짧은 문장으로 메모하세요. AI가 완성된 묵상 글로 다듬어드립니다.
                     </p>
                   </div>
 
-                  {/* AI Refine Button */}
                   <div className="flex items-center gap-3">
                     <button
                       type="button"
@@ -514,14 +550,12 @@ export default function NewPostPage() {
                     )}
                   </div>
 
-                  {/* AI Error */}
                   {refineError && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                       <p className="text-sm text-red-600">{refineError}</p>
                     </div>
                   )}
 
-                  {/* Refined Text Editor */}
                   {body && (
                     <div>
                       <div className="flex items-center justify-between mb-2">
@@ -577,16 +611,16 @@ export default function NewPostPage() {
               </div>
               {tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
+                  {tags.map((tag, i) => (
                     <span
-                      key={tag}
-                      className="inline-flex items-center space-x-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                      key={i}
+                      className="px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm flex items-center gap-2"
                     >
-                      <span>#{tag}</span>
+                      #{tag}
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        className="text-gray-500 hover:text-red-600"
+                        className="text-primary-900 hover:text-primary-700"
                       >
                         ×
                       </button>
@@ -596,62 +630,39 @@ export default function NewPostPage() {
               )}
             </div>
 
-            {/* Visibility and Church */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  공개 범위 *
-                </label>
-                <select
-                  value={visibility}
-                  onChange={(e) => setVisibility(e.target.value as any)}
-                  className="input-field"
-                  required
-                >
-                  <option value="public">전체 공개</option>
-                  <option value="church">교회 내 공개</option>
-                  <option value="friends">친구 공개</option>
-                  <option value="private">비공개</option>
-                </select>
-              </div>
-
-              {visibility === 'church' && churches.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    교회 선택 *
-                  </label>
-                  <select
-                    value={selectedChurch}
-                    onChange={(e) => setSelectedChurch(e.target.value)}
-                    className="input-field"
-                    required={visibility === 'church'}
-                  >
-                    <option value="">교회를 선택하세요</option>
-                    {churches.map((church) => (
-                      <option key={church.id} value={church.id}>
-                        {church.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+            {/* Visibility */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                공개 범위
+              </label>
+              <select
+                value={visibility}
+                onChange={(e) => setVisibility(e.target.value as any)}
+                className="input-field"
+              >
+                <option value="public">전체 공개</option>
+                <option value="church">교회 멤버만</option>
+                <option value="friends">친구만</option>
+                <option value="private">나만 보기</option>
+              </select>
             </div>
 
-            {/* Submit */}
-            <div className="flex justify-end space-x-3 pt-4">
+            {/* Submit Buttons */}
+            <div className="flex gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="btn-secondary"
+                className="flex-1 btn-secondary"
+                disabled={isLoading}
               >
                 취소
               </button>
               <button
                 type="submit"
+                className="flex-1 btn-primary"
                 disabled={isLoading}
-                className="btn-primary"
               >
-                {isLoading ? '작성 중...' : '게시하기'}
+                {isLoading ? '수정 중...' : '수정 완료'}
               </button>
             </div>
           </form>

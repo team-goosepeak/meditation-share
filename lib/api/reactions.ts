@@ -50,7 +50,7 @@ export async function getPostReactions(postId: string) {
 
   // Count reactions by type
   const counts = data?.reduce((acc, r) => {
-    const existing = acc.find(item => item.type === r.type)
+    const existing = acc.find((item: { type: string; count: number }) => item.type === r.type)
     if (existing) {
       existing.count++
     } else {

@@ -165,6 +165,8 @@ export async function updatePost(
     scriptures: Scripture[]
     tags: string[]
     visibility: 'public' | 'church' | 'friends' | 'private'
+    sermon_date: string
+    sermon_location: string
   }>
 ) {
   const { data, error } = await supabase

@@ -6,9 +6,11 @@ import Layout from '@/components/Layout'
 import { getPost } from '@/lib/api/posts'
 import { getComments, createComment } from '@/lib/api/comments'
 import { addReaction, ReactionType } from '@/lib/api/reactions'
+import { getCurrentUser } from '@/lib/auth'
 import { Post, Comment } from '@/lib/supabase'
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale/ko'
+import Link from 'next/link'
 
 export default function PostDetailPage() {
   const params = useParams()
@@ -21,11 +23,24 @@ export default function PostDetailPage() {
   const [isLoadingPost, setIsLoadingPost] = useState(true)
   const [isLoadingComments, setIsLoadingComments] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   useEffect(() => {
+    loadCurrentUser()
     loadPost()
     loadComments()
   }, [postId])
+
+  async function loadCurrentUser() {
+    try {
+      const user = await getCurrentUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    } catch (error) {
+      console.error('Failed to load current user:', error)
+    }
+  }
 
   async function loadPost() {
     setIsLoadingPost(true)
@@ -128,11 +143,21 @@ export default function PostDetailPage() {
                 </p>
               </div>
             </div>
-            {post.church && (
-              <span className="text-sm px-3 py-1 bg-primary-100 text-primary-700 rounded-full">
-                {post.church.name}
-              </span>
-            )}
+            <div className="flex items-center gap-3">
+              {post.church && (
+                <span className="text-sm px-3 py-1 bg-primary-100 text-primary-700 rounded-full">
+                  {post.church.name}
+                </span>
+              )}
+              {currentUserId === post.author_id && (
+                <Link
+                  href={`/posts/${postId}/edit`}
+                  className="text-sm px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  수정
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Title */}
