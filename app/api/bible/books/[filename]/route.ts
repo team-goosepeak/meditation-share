@@ -34,7 +34,7 @@ export async function GET(
         'Cache-Control': 'public, max-age=31536000, immutable', // 1년 캐싱
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error reading bible book:', error);
     return NextResponse.json(
       { error: 'Book not found' },

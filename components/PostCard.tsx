@@ -72,7 +72,6 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
         <h3 className="text-lg font-semibold mb-2 hover:text-primary-700 transition-colors">
           {post.title}
         </h3>
-        <p className="text-gray-700 mb-3 line-clamp-3">{post.body}</p>
 
         {/* Scriptures */}
         {post.scriptures && post.scriptures.length > 0 && (
@@ -83,7 +82,15 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
                   📖 {scripture.book} {scripture.chapter}:{scripture.verseFrom}
                   {scripture.verseTo && scripture.verseTo !== scripture.verseFrom && `-${scripture.verseTo}`}
                 </p>
-                {scripture.text && (
+                {scripture.verses ? (
+                  <div className="text-sm text-gray-700 leading-relaxed space-y-1">
+                    {scripture.verses.map((v) => (
+                      <p key={v.verse} className="italic">
+                        {scripture.chapter}:{v.verse} &quot;{v.text}&quot;
+                      </p>
+                    ))}
+                  </div>
+                ) : scripture.text && (
                   <p className="text-sm text-gray-700 leading-relaxed italic">
                     &quot;{scripture.text}&quot;
                   </p>
@@ -92,6 +99,8 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
             ))}
           </div>
         )}
+
+        <p className="text-gray-700 mb-3 line-clamp-3">{post.body}</p>
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (

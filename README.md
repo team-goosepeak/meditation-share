@@ -14,12 +14,12 @@
 - ✅ **인증 시스템**: 이메일 기반 회원가입/로그인
 
 ### 향후 추가 예정
-- 📱 모바일 앱 (Capacitor)
 - 🎵 설교 오디오/영상 업로드
 - 🏆 묵상 챌린지
 - 💬 소그룹 채팅
 - 📊 목회자 대시보드
 - 🙏 기도 제목 피드
+- 🍎 iOS 앱 빌드
 
 ## 🛠 기술 스택
 
@@ -32,8 +32,12 @@
 - **Supabase** - PostgreSQL 데이터베이스, 인증, Row Level Security
 - **Supabase Auth** - 이메일 인증, 소셜 로그인 (확장 가능)
 
+### Mobile
+- **Capacitor** - 웹 앱을 네이티브 앱으로 변환 (Android, iOS)
+
 ### 배포
 - **Vercel** (권장) - Next.js 최적화 호스팅
+- **Google Play Store** - Android 앱 배포
 
 ## 🚀 시작하기
 
@@ -83,6 +87,31 @@ npm run dev
 
 브라우저에서 [http://localhost:3000](http://localhost:3000) 열기
 
+## 📱 모바일 앱 빌드 (Android)
+
+Capacitor를 사용하여 Android 앱을 빌드할 수 있습니다.
+
+### 사전 요구사항
+- Android Studio 설치
+- JDK 17 이상
+- Android SDK (API Level 22+)
+
+### 빌드 명령어
+
+```bash
+# NextJS 앱 빌드 및 Capacitor와 동기화
+npm run build:android
+
+# Android Studio 열기
+npm run open:android
+
+# 에뮬레이터/기기에서 직접 실행
+npm run cap:run:android
+```
+
+### 자세한 가이드
+Android 앱 빌드 및 배포에 대한 자세한 내용은 [ANDROID_BUILD_GUIDE.md](ANDROID_BUILD_GUIDE.md)를 참조하세요.
+
 ### 6. 성경 데이터 준비 (선택)
 
 성경 구절 검색 기능을 사용하려면:
@@ -126,6 +155,9 @@ meditation-share/
 │       ├── reactions.ts
 │       ├── churches.ts
 │       └── bible.ts        # 성경 구절 조회
+├── android/                 # Capacitor Android 프로젝트
+│   ├── app/                # Android 앱 소스
+│   └── key.properties.example # 앱 서명 설정 예제
 ├── supabase/
 │   ├── migrations/          # DB 마이그레이션
 │   └── bible/              # 성경 데이터
@@ -138,7 +170,9 @@ meditation-share/
 │       ├── KorRV/          # 개역한글판 분할 데이터
 │       │   └── books/      # 책별 분할 JSON (66개)
 │       └── README.md       # 저작권 & 가이드
-└── public/                  # 정적 파일
+├── public/                  # 정적 파일
+├── capacitor.config.ts      # Capacitor 설정
+└── out/                     # NextJS 빌드 출력 (static export)
 ```
 
 ## 📖 문서
@@ -149,10 +183,12 @@ meditation-share/
   - API 레이어 설계
   - 프론트엔드 아키텍처
   - 성능 최적화 전략
-- **[RLS_GUIDE.md](RLS_GUIDE.md)** - Row Level Security 가이드
-  - RLS가 무엇인지, 왜 필요한지
-  - 개발 단계에서 비활성화하는 이유
-  - 프로덕션 배포 시 활성화 방법
+- **[ANDROID_BUILD_GUIDE.md](ANDROID_BUILD_GUIDE.md)** - Android 앱 빌드 및 배포 가이드
+  - Android Studio 설정
+  - 개발 빌드 및 테스트
+  - 프로덕션 빌드 (APK/AAB)
+  - Google Play Store 배포
+  - 트러블슈팅
 - **[supabase/bible/USAGE.md](supabase/bible/USAGE.md)** - 성경 구절 검색 가이드
   - API 사용법 및 예시
   - 지원하는 책 이름 및 약어

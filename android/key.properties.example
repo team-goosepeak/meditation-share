@@ -1,0 +1,9 @@
+# Android 앱 서명 설정 예제
+# 이 파일을 복사하여 key.properties 파일을 생성하고 실제 값으로 채우세요.
+# key.properties 파일은 .gitignore에 포함되어 있으므로 Git에 커밋되지 않습니다.
+
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=meditation-share
+storeFile=../meditation-share-release.keystore
+

@@ -150,16 +150,28 @@ export default function PostDetailPage() {
 
           {/* Scriptures */}
           {post.scriptures && post.scriptures.length > 0 && (
-            <div className="mb-6 p-4 bg-cream-50 rounded-lg border border-cream-200">
-              <p className="font-medium text-primary-700">
-                {post.scriptures.map((s, i) => (
-                  <span key={i}>
-                    {i > 0 && ', '}
-                    {s.book} {s.chapter}:{s.verseFrom}
-                    {s.verseTo && s.verseTo !== s.verseFrom && `-${s.verseTo}`}
-                  </span>
-                ))}
-              </p>
+            <div className="mb-6 space-y-3">
+              {post.scriptures.map((scripture, i) => (
+                <div key={i} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <p className="text-sm font-bold text-blue-900 mb-2">
+                    📖 {scripture.book} {scripture.chapter}:{scripture.verseFrom}
+                    {scripture.verseTo && scripture.verseTo !== scripture.verseFrom && `-${scripture.verseTo}`}
+                  </p>
+                  {scripture.verses ? (
+                    <div className="text-sm text-gray-700 leading-relaxed space-y-1">
+                      {scripture.verses.map((v) => (
+                        <p key={v.verse} className="italic">
+                          {scripture.chapter}:{v.verse} &quot;{v.text}&quot;
+                        </p>
+                      ))}
+                    </div>
+                  ) : scripture.text && (
+                    <p className="text-sm text-gray-700 leading-relaxed italic">
+                      &quot;{scripture.text}&quot;
+                    </p>
+                  )}
+                </div>
+              ))}
             </div>
           )}
 

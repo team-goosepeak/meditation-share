@@ -37,18 +37,14 @@ const verses = await getBibleVerses('요한복음', 3, 16, 18)
 console.log(verses) // 3:16-18 범위 조회
 ```
 
-### 3. UI 컴포넌트 사용
+### 3. UI에서 사용
 
-```tsx
-import BibleSearch from '@/components/BibleSearch'
+포스트 작성 페이지(`/posts/new`)에서 성경 구절을 추가할 수 있습니다:
 
-<BibleSearch 
-  onSelect={(reference) => {
-    console.log('선택된 구절:', reference)
-    console.log('텍스트:', reference.verses.map(v => v.text).join(' '))
-  }}
-/>
-```
+1. 드롭다운에서 성경책 선택
+2. 장, 절 번호 입력
+3. "미리보기" 버튼 클릭하여 내용 확인
+4. "추가" 버튼으로 포스트에 추가
 
 ---
 
@@ -99,21 +95,20 @@ result.verses.forEach(verse => {
 
 ---
 
-### `parseBibleReference(query: string)`
+### `getAllBookNames()`
 
-검색 문자열을 파싱합니다 (검증용).
+모든 성경책 이름 목록을 반환합니다 (드롭다운 등에서 사용).
 
 **예시:**
 ```typescript
-const parsed = parseBibleReference('요한복음 3:16-18')
+const books = getAllBookNames()
+// ["창세기", "출애굽기", ..., "요한계시록"]
 
-console.log(parsed)
-// {
-//   book: "요한복음",
-//   chapter: 3,
-//   verseFrom: 16,
-//   verseTo: 18
-// }
+<select>
+  {books.map(book => (
+    <option key={book} value={book}>{book}</option>
+  ))}
+</select>
 ```
 
 ---
@@ -132,40 +127,25 @@ console.log(parsed)
 
 ---
 
-## 🎨 UI 컴포넌트
+## 🎨 UI 사용 방법
 
-### BibleSearch
+### 포스트 작성 페이지에서 성경 구절 추가
 
-성경 구절을 검색하고 선택할 수 있는 컴포넌트입니다.
+1. **성경책 선택**: 드롭다운에서 66권 중 선택
+2. **장/절 입력**: 숫자로 입력 (끝 절은 선택사항)
+3. **미리보기**: 클릭하여 구절 내용 확인
+4. **추가**: 확인 후 포스트에 추가
 
-**Props:**
-```typescript
-interface BibleSearchProps {
-  onSelect: (reference: BibleReference) => void
-  className?: string
-}
-```
+**특징:**
+- 📖 66권 전체 드롭다운 지원
+- 👀 실시간 미리보기
+- ✅ 내용 확인 후 추가
+- 🎯 명확한 입력 필드 레이블
 
-**기능:**
-- 📝 실시간 책 이름 자동완성
-- 🔍 구절 검색 및 미리보기
-- ✅ 선택하기 버튼으로 구절 추가
-- 💡 사용 팁 표시
-
-**예시:**
-```tsx
-<BibleSearch 
-  onSelect={(reference) => {
-    setScriptures([...scriptures, {
-      book: reference.book,
-      chapter: reference.chapter,
-      verseFrom: reference.verseFrom,
-      verseTo: reference.verseTo,
-      text: reference.verses.map(v => v.text).join(' ')
-    }])
-  }}
-/>
-```
+**예시 입력:**
+- 요한복음 3장 16절
+- 창세기 1장 1절부터 3절까지
+- 시편 23장 1절
 
 ---
 
@@ -183,17 +163,13 @@ npm run dev
 http://localhost:3000/posts/new
 ```
 
-### 3. 성경 구절 검색 테스트
+### 3. 성경 구절 입력 테스트
 
-다음 구절들을 검색해보세요:
+다음 구절들을 입력해보세요:
 
-```
-요한복음 3:16
-창세기 1:1-3
-시편 23:1
-요 14:6
-창 1:1
-```
+- 성경책: **요한복음** / 장: **3** / 시작 절: **16**
+- 성경책: **창세기** / 장: **1** / 시작 절: **1** / 끝 절: **3**
+- 성경책: **시편** / 장: **23** / 시작 절: **1**
 
 ---
 
@@ -246,11 +222,10 @@ app/api/bible/books/[filename]/
 └── route.ts                # 파일 서빙 API
 
 components/
-├── BibleSearch.tsx         # 검색 컴포넌트
 └── PostCard.tsx            # 구절 표시 (수정됨)
 
 app/posts/new/
-└── page.tsx                # 작성 페이지 (통합됨)
+└── page.tsx                # 작성 페이지 (성경 입력 기능 포함)
 ```
 
 ---

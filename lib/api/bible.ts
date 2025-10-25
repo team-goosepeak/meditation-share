@@ -231,10 +231,10 @@ async function loadBook(bookName: BibleBookName): Promise<any> {
       return book;
     }
     
-    // 클라이언트 환경에서 fetch
+    // 클라이언트 환경에서 API 호출
     const response = await fetch(`/api/bible/books/${fileName}`);
     if (!response.ok) {
-      throw new Error(`Failed to load book: ${fileName}`);
+      throw new Error(`Failed to load book: ${fileName} (HTTP ${response.status})`);
     }
     const book = await response.json();
     bookCache.set(fileName, book);

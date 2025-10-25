@@ -52,6 +52,11 @@ export type Scripture = {
   chapter: number
   verseFrom: number
   verseTo?: number
+  text?: string  // 전체 텍스트 (DB 저장용)
+  verses?: Array<{  // 각 절 정보 (UI 표시용)
+    verse: number
+    text: string
+  }>
 }
 
 export type Comment = {

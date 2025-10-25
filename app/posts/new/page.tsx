@@ -1,14 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Layout from '@/components/Layout'
-import BibleSearch from '@/components/BibleSearch'
 import { createPost } from '@/lib/api/posts'
 import { getUserChurches } from '@/lib/api/churches'
 import { getCurrentUser } from '@/lib/auth'
 import { Church, Scripture } from '@/lib/supabase'
-import { BibleReference } from '@/lib/api/bible'
+import { getBibleVerses, getAllBookNames, type BibleBookName, type BibleVerse } from '@/lib/api/bible'
 
 export default function NewPostPage() {
   const router = useRouter()
@@ -20,64 +19,100 @@ export default function NewPostPage() {
   const [visibility, setVisibility] = useState<'public' | 'church' | 'friends' | 'private'>('public')
   const [selectedChurch, setSelectedChurch] = useState<string>('')
   const [churches, setChurches] = useState<Church[]>([])
-  const [sermonDate, setSermonDate] = useState('')
+  const [sermonDate, setSermonDate] = useState(new Date().toISOString().split('T')[0])
   const [sermonLocation, setSermonLocation] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [showManualInput, setShowManualInput] = useState(false)
 
   // Scripture input fields
-  const [scriptureBook, setScriptureBook] = useState('')
+  const [scriptureBook, setScriptureBook] = useState<BibleBookName | ''>('')
   const [scriptureChapter, setScriptureChapter] = useState('')
   const [scriptureVerseFrom, setScriptureVerseFrom] = useState('')
   const [scriptureVerseTo, setScriptureVerseTo] = useState('')
+  const [previewVerses, setPreviewVerses] = useState<BibleVerse[] | null>(null)
+  const [isLoadingVerse, setIsLoadingVerse] = useState(false)
+  const [verseError, setVerseError] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadChurches()
-  }, [])
-
-  async function loadChurches() {
+  const loadChurches = useCallback(async () => {
     try {
       const user = await getCurrentUser()
       if (user) {
         const userChurches = await getUserChurches(user.id)
-        setChurches(userChurches as Church[])
+        setChurches(userChurches)
+        
+        // 예배 장소 기본값 설정: 첫 번째 교회명
+        if (userChurches.length > 0 && !sermonLocation) {
+          setSermonLocation(userChurches[0].name)
+        }
       }
     } catch (error) {
       console.error('Failed to load churches:', error)
     }
+  }, [sermonLocation])
+
+  useEffect(() => {
+    loadChurches()
+  }, [loadChurches])
+
+  async function previewScripture() {
+    if (!scriptureBook || !scriptureChapter || !scriptureVerseFrom) {
+      setVerseError('책, 장, 절을 모두 입력해주세요.')
+      return
+    }
+
+    setIsLoadingVerse(true)
+    setVerseError(null)
+    setPreviewVerses(null)
+
+    try {
+      const chapter = parseInt(scriptureChapter)
+      const verseFrom = parseInt(scriptureVerseFrom)
+      const verseTo = scriptureVerseTo ? parseInt(scriptureVerseTo) : undefined
+
+      const result = await getBibleVerses(
+        scriptureBook as BibleBookName,
+        chapter,
+        verseFrom,
+        verseTo
+      )
+
+      setPreviewVerses(result.verses)
+    } catch (error: any) {
+      setVerseError(error.message || '성경 구절을 불러올 수 없습니다.')
+    } finally {
+      setIsLoadingVerse(false)
+    }
   }
 
   function addScripture() {
-    if (!scriptureBook || !scriptureChapter || !scriptureVerseFrom) return
+    if (!scriptureBook || !scriptureChapter || !scriptureVerseFrom || !previewVerses) {
+      return
+    }
 
     const newScripture: Scripture = {
       book: scriptureBook,
       chapter: parseInt(scriptureChapter),
       verseFrom: parseInt(scriptureVerseFrom),
       verseTo: scriptureVerseTo ? parseInt(scriptureVerseTo) : undefined,
+      text: previewVerses.map(v => v.text.trim()).join(' '),
+      verses: previewVerses.map(v => ({
+        verse: v.verse,
+        text: v.text.trim()
+      })),
     }
 
     setScriptures([...scriptures, newScripture])
+    
+    // 입력 필드 초기화
     setScriptureBook('')
     setScriptureChapter('')
     setScriptureVerseFrom('')
     setScriptureVerseTo('')
+    setPreviewVerses(null)
+    setVerseError(null)
   }
 
   function removeScripture(index: number) {
     setScriptures(scriptures.filter((_, i) => i !== index))
-  }
-
-  function handleBibleSelect(reference: BibleReference) {
-    const newScripture: Scripture = {
-      book: reference.book,
-      chapter: reference.chapter,
-      verseFrom: reference.verseFrom,
-      verseTo: reference.verseTo || reference.verseFrom,
-      text: reference.verses.map(v => v.text.trim()).join(' '),
-    }
-
-    setScriptures([...scriptures, newScripture])
   }
 
   function addTag() {
@@ -168,6 +203,186 @@ export default function NewPostPage() {
               </div>
             </div>
 
+            {/* Scriptures */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                관련 성경 구절
+              </label>
+
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+                  {/* 책 선택 */}
+                  <div className="md:col-span-4">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      성경책 *
+                    </label>
+                    <select
+                      value={scriptureBook}
+                      onChange={(e) => {
+                        setScriptureBook(e.target.value as BibleBookName)
+                        setPreviewVerses(null)
+                        setVerseError(null)
+                      }}
+                      className="input-field w-full"
+                    >
+                      <option value="">선택하세요</option>
+                      {getAllBookNames().map((book) => (
+                        <option key={book} value={book}>
+                          {book}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* 장 입력 */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      장 *
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={scriptureChapter}
+                      onChange={(e) => {
+                        setScriptureChapter(e.target.value)
+                        setPreviewVerses(null)
+                        setVerseError(null)
+                      }}
+                      className="input-field w-full"
+                      placeholder="1"
+                    />
+                  </div>
+
+                  {/* 시작 절 */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      시작 절 *
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={scriptureVerseFrom}
+                      onChange={(e) => {
+                        setScriptureVerseFrom(e.target.value)
+                        setPreviewVerses(null)
+                        setVerseError(null)
+                      }}
+                      className="input-field w-full"
+                      placeholder="1"
+                    />
+                  </div>
+
+                  {/* 끝 절 (선택) */}
+                  <div className="md:col-span-2">
+                    <label className="block text-xs text-gray-600 mb-1">
+                      끝 절 (선택)
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={scriptureVerseTo}
+                      onChange={(e) => {
+                        setScriptureVerseTo(e.target.value)
+                        setPreviewVerses(null)
+                        setVerseError(null)
+                      }}
+                      className="input-field w-full"
+                      placeholder="5"
+                    />
+                  </div>
+
+                  {/* 미리보기 버튼 */}
+                  <div className="md:col-span-2 flex items-end">
+                    <button
+                      type="button"
+                      onClick={previewScripture}
+                      disabled={isLoadingVerse || !scriptureBook || !scriptureChapter || !scriptureVerseFrom}
+                      className="btn-secondary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoadingVerse ? '로딩...' : '미리보기'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* 도움말 */}
+                <p className="mt-2 text-xs text-gray-500">
+                  💡 예시: 요한복음 3장 16절 또는 창세기 1장 1-3절
+                </p>
+
+                {/* 에러 메시지 */}
+                {verseError && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-sm text-red-600">{verseError}</p>
+                  </div>
+                )}
+
+                {/* 미리보기 결과 */}
+                {previewVerses && (
+                  <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start justify-between mb-2">
+                      <p className="text-sm font-bold text-blue-900">
+                        📖 {scriptureBook} {scriptureChapter}:{scriptureVerseFrom}
+                        {scriptureVerseTo && scriptureVerseTo !== scriptureVerseFrom && `-${scriptureVerseTo}`}
+                      </p>
+                      <button
+                        type="button"
+                        onClick={addScripture}
+                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        추가
+                      </button>
+                    </div>
+                    <div className="text-sm text-gray-700 leading-relaxed space-y-1">
+                      {previewVerses.map((verse) => (
+                        <p key={verse.verse} className="italic">
+                          {scriptureChapter}:{verse.verse} &quot;{verse.text.trim()}&quot;
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* 추가된 성경 구절 목록 */}
+              {scriptures.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-gray-700 mb-2">
+                    추가된 구절 ({scriptures.length}개)
+                  </p>
+                  {scriptures.map((scripture, index) => (
+                    <div key={index} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start justify-between mb-2">
+                        <span className="text-sm font-bold text-blue-900">
+                          📖 {scripture.book} {scripture.chapter}:{scripture.verseFrom}
+                          {scripture.verseTo && scripture.verseTo !== scripture.verseFrom && `-${scripture.verseTo}`}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeScripture(index)}
+                          className="text-red-600 hover:text-red-700 text-sm font-medium"
+                        >
+                          삭제
+                        </button>
+                      </div>
+                      {scripture.verses ? (
+                        <div className="text-sm text-gray-700 leading-relaxed space-y-1">
+                          {scripture.verses.map((v) => (
+                            <p key={v.verse} className="italic">
+                              {scripture.chapter}:{v.verse} &quot;{v.text}&quot;
+                            </p>
+                          ))}
+                        </div>
+                      ) : scripture.text && (
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {scripture.text}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Body */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -184,93 +399,6 @@ export default function NewPostPage() {
               <p className="mt-2 text-sm text-gray-500">
                 💡 팁: 요약 → 느낀 점 → 적용점 → 기도제목 순서로 작성해보세요
               </p>
-            </div>
-
-            {/* Scriptures */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <label className="block text-sm font-medium text-gray-700">
-                  관련 성경 구절
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setShowManualInput(!showManualInput)}
-                  className="text-sm text-blue-600 hover:text-blue-700"
-                >
-                  {showManualInput ? '🔍 검색 입력으로 전환' : '✍️ 수동 입력으로 전환'}
-                </button>
-              </div>
-
-              {!showManualInput ? (
-                /* 성경 검색 컴포넌트 */
-                <BibleSearch onSelect={handleBibleSelect} />
-              ) : (
-                /* 기존 수동 입력 */
-                <div className="grid grid-cols-12 gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={scriptureBook}
-                    onChange={(e) => setScriptureBook(e.target.value)}
-                    className="input-field col-span-4"
-                    placeholder="요한복음"
-                  />
-                  <input
-                    type="number"
-                    value={scriptureChapter}
-                    onChange={(e) => setScriptureChapter(e.target.value)}
-                    className="input-field col-span-2"
-                    placeholder="3"
-                  />
-                  <input
-                    type="number"
-                    value={scriptureVerseFrom}
-                    onChange={(e) => setScriptureVerseFrom(e.target.value)}
-                    className="input-field col-span-2"
-                    placeholder="16"
-                  />
-                  <input
-                    type="number"
-                    value={scriptureVerseTo}
-                    onChange={(e) => setScriptureVerseTo(e.target.value)}
-                    className="input-field col-span-2"
-                    placeholder="18"
-                  />
-                  <button
-                    type="button"
-                    onClick={addScripture}
-                    className="btn-primary col-span-2"
-                  >
-                    추가
-                  </button>
-                </div>
-              )}
-
-              {scriptures.length > 0 && (
-                <div className="space-y-2 mt-4">
-                  {scriptures.map((scripture, index) => (
-                    <div key={index} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-start justify-between mb-2">
-                        <span className="text-sm font-bold text-blue-900">
-                          📖 {scripture.book} {scripture.chapter}:{scripture.verseFrom}
-                          {scripture.verseTo && scripture.verseTo !== scripture.verseFrom && `-${scripture.verseTo}`}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => removeScripture(index)}
-                          className="text-red-600 hover:text-red-700 text-sm"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                      {scripture.text && (
-                        <p className="text-sm text-gray-700 leading-relaxed">
-                          {scripture.text}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
 
             {/* Tags */}

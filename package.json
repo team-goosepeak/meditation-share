@@ -6,17 +6,27 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prebuild:android": "mkdir -p public/bible && cp -r supabase/bible/KorRV/books public/bible/",
+    "build:android": "ANDROID_BUILD=true next build && npx cap sync android && npx cap copy android",
+    "postbuild:android": "rm -rf public/bible",
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:run:android": "npx cap run android",
+    "open:android": "npx cap open android"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
-    "@supabase/auth-helpers-nextjs": "^0.8.7",
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/cli": "^6.2.1",
+    "@capacitor/core": "^7.4.4",
     "@heroicons/react": "^2.1.1",
+    "@supabase/auth-helpers-nextjs": "^0.8.7",
+    "@supabase/supabase-js": "^2.39.0",
+    "clsx": "^2.0.0",
+    "date-fns": "^3.0.6",
     "next": "14.0.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "date-fns": "^3.0.6",
-    "clsx": "^2.0.0"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
@@ -30,4 +40,3 @@
     "typescript": "^5.3.3"
   }
 }
-

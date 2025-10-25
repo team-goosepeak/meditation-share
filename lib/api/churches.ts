@@ -1,4 +1,4 @@
-import { supabase } from '../supabase'
+import { supabase, Church } from '../supabase'
 
 function generateJoinCode(): string {
   return Math.random().toString(36).substring(2, 10).toUpperCase()
@@ -68,7 +68,7 @@ export async function getChurches() {
   return data
 }
 
-export async function getUserChurches(userId: string) {
+export async function getUserChurches(userId: string): Promise<Church[]> {
   const { data, error } = await supabase
     .from('church_members')
     .select(`
@@ -77,7 +77,7 @@ export async function getUserChurches(userId: string) {
     .eq('user_id', userId)
 
   if (error) throw error
-  return data?.map(item => item.church) || []
+  return (data?.map(item => item.church).filter(Boolean) || []) as Church[]
 }
 
 export async function joinChurch(joinCode: string) {
