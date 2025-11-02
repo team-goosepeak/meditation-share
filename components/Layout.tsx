@@ -96,7 +96,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   // 경로 깊이 계산 (뒤로가기 버튼 표시 여부)
   const pathDepth = pathname?.split('/').filter(Boolean).length || 0
-  const shouldShowBackButton = pathDepth >= 2
+  // 탭 기본 화면 목록 (뒤로가기 버튼 숨김)
+  const tabRootPaths = [
+    '/main/feed',
+    '/main',
+    '/main/churches',
+    '/main/posts/new',
+    '/main/journal',
+    '/main/profile'
+  ]
+  // 탭 기본 화면이 아니고 깊이가 2 이상인 경우에만 뒤로가기 버튼 표시
+  const shouldShowBackButton = pathDepth >= 2 && !tabRootPaths.includes(pathname || '')
 
   // 페이지 제목 설정
   const getPageTitle = () => {
@@ -127,28 +137,30 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="w-full max-w-[512px] min-h-screen bg-white shadow-xl relative flex flex-col">
         {/* Top Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-40 px-4 h-14 flex items-center">
-          {/* 뒤로가기 버튼 */}
-          {shouldShowBackButton && (
-            <button
-              onClick={() => router.back()}
-              className="p-2 -ml-2 text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg transition-colors"
-              aria-label="뒤로가기"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {/* 좌측 공간 (뒤로가기 버튼 또는 빈 공간) */}
+          <div className="w-10 flex items-center">
+            {shouldShowBackButton && (
+              <button
+                onClick={() => router.back()}
+                className="p-2 -ml-2 text-gray-600 hover:text-gray-900 active:bg-gray-100 rounded-lg transition-colors"
+                aria-label="뒤로가기"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-          )}
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
           
           {/* 페이지 제목 */}
           <h1 className="text-lg font-bold text-gray-900 flex-1 text-center">

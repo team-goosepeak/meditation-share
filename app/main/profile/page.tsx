@@ -7,6 +7,8 @@ import { getUserChurches } from '@/lib/api/churches'
 import { getPosts } from '@/lib/api/posts'
 import { Church } from '@/lib/supabase'
 import Link from 'next/link'
+import Image from 'next/image'
+import Footer from '@/components/Footer'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -66,6 +68,14 @@ export default function ProfilePage() {
 
   return (
     <div className="p-4">
+
+        <Image
+          src="/logo/logo_full.png"
+          alt="Worship Reflection"
+          width={300}
+          height={300}
+          className="mx-auto"
+        />
         {/* 프로필 헤더 */}
         <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-6 text-white mb-6">
           <div className="flex items-center space-x-4">
@@ -173,11 +183,7 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* 버전 정보 */}
-        <div className="text-center text-sm text-gray-500 pt-4 border-t border-gray-200">
-          <p>리플렉션 - Worship Reflection v1.0.0</p>
-          <p className="mt-1">© 2025 All rights reserved</p>
-        </div>
+        <Footer />
     </div>
   )
 }

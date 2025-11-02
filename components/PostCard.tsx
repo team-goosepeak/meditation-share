@@ -83,15 +83,6 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
               {post.church.name}
             </span>
           )}
-          {currentUserId === post.author_id && (
-            <Link
-              href={`/main/posts/${post.id}/edit`}
-              className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-              onClick={(e) => e.stopPropagation()}
-            >
-              수정
-            </Link>
-          )}
         </div>
       </div>
 
@@ -103,32 +94,20 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
 
         {/* Scriptures */}
         {post.scriptures && post.scriptures.length > 0 && (
-          <div className="mb-3 space-y-2">
-            {post.scriptures.map((scripture, i) => (
-              <div key={i} className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-xs font-bold text-blue-900 mb-1">
-                  📖 {scripture.book} {scripture.chapter}:{scripture.verseFrom}
+          <div className="mb-3">
+            <p className="text-sm text-gray-600">
+              {post.scriptures.map((scripture, i) => (
+                <span key={i}>
+                  {i > 0 && ' | '}
+                  {scripture.book} {scripture.chapter}:{scripture.verseFrom}
                   {scripture.verseTo && scripture.verseTo !== scripture.verseFrom && `-${scripture.verseTo}`}
-                </p>
-                {scripture.verses ? (
-                  <div className="text-sm text-gray-700 leading-relaxed space-y-1">
-                    {scripture.verses.map((v) => (
-                      <p key={v.verse} className="italic">
-                        {scripture.chapter}:{v.verse} &quot;{v.text}&quot;
-                      </p>
-                    ))}
-                  </div>
-                ) : scripture.text && (
-                  <p className="text-sm text-gray-700 leading-relaxed italic">
-                    &quot;{scripture.text}&quot;
-                  </p>
-                )}
-              </div>
-            ))}
+                </span>
+              ))}
+            </p>
           </div>
         )}
 
-        <p className="text-gray-700 mb-3 line-clamp-3">{post.body}</p>
+        <p className="text-gray-700 mb-3 line-clamp-10 whitespace-pre-wrap">{post.body}</p>
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { getPost } from '@/lib/api/posts'
+import { getPost, deletePost } from '@/lib/api/posts'
 import { getComments, createComment } from '@/lib/api/comments'
 import { addReaction, ReactionType } from '@/lib/api/reactions'
 import { getCurrentUser } from '@/lib/auth'
@@ -23,6 +23,7 @@ export default function PostDetailPage() {
   const [isLoadingComments, setIsLoadingComments] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     loadCurrentUser()
@@ -93,6 +94,20 @@ export default function PostDetailPage() {
     }
   }
 
+  async function handleDelete() {
+    if (!confirm('정말로 이 글을 삭제하시겠습니까?')) return
+
+    setIsDeleting(true)
+    try {
+      await deletePost(postId)
+      router.push('/main/feed')
+    } catch (error) {
+      console.error('Failed to delete post:', error)
+      alert('글 삭제에 실패했습니다')
+      setIsDeleting(false)
+    }
+  }
+
   const reactionIcons: Record<ReactionType, string> = {
     heart: '❤️',
     pray: '🙏',
@@ -121,11 +136,10 @@ export default function PostDetailPage() {
   }
 
   return (
-    <div className="p-4">
-        {/* Post Content */}
-        <div className="card p-8 mb-6">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-6">
+    <div>
+        {/* Post Header */}
+        <div className="px-4 pt-4">
+          <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-primary-200 rounded-full flex items-center justify-center">
                 <span className="text-primary-700 font-semibold text-lg">
@@ -146,12 +160,21 @@ export default function PostDetailPage() {
                 </span>
               )}
               {currentUserId === post.author_id && (
-                <Link
-                  href={`/main/posts/${postId}/edit`}
-                  className="text-sm px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  수정
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/main/posts/${postId}/edit`}
+                    className="text-sm px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    수정
+                  </Link>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="text-sm px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50"
+                  >
+                    {isDeleting ? '삭제 중...' : '삭제'}
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -197,13 +220,15 @@ export default function PostDetailPage() {
           )}
 
           {/* Body */}
-          <div className="prose max-w-none mb-6">
-            <p className="text-gray-800 whitespace-pre-wrap">{post.body}</p>
+          <div className="mb-6">
+            <div className="text-gray-800 whitespace-pre-wrap text-justify leading-relaxed [text-align-last:left]">
+              {post.body}
+            </div>
           </div>
 
           {/* Tags */}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-4">
               {post.tags.map((tag, i) => (
                 <span key={i} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm">
                   #{tag}
@@ -213,19 +238,19 @@ export default function PostDetailPage() {
           )}
 
           {/* Reactions */}
-          <div className="flex items-center space-x-2 pt-6 border-t border-gray-100">
+          <div className="flex flex-wrap gap-3 pt-4 pb-4 border-t border-gray-100">
             {(['heart', 'pray', 'amen', 'thanks'] as ReactionType[]).map((type) => {
               const count = post.reactions_count?.find(r => r.type === type)?.count || 0
               return (
                 <button
                   key={type}
                   onClick={() => handleReaction(type)}
-                  className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex flex-col items-center space-y-1 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors"
                   title={reactionLabels[type]}
                 >
                   <span className="text-xl">{reactionIcons[type]}</span>
-                  <span className="text-sm font-medium text-gray-700">{reactionLabels[type]}</span>
-                  {count > 0 && <span className="text-sm text-gray-500">({count})</span>}
+                  <span className="text-xs font-medium text-gray-700">{reactionLabels[type]}</span>
+                  {count > 0 && <span className="text-xs text-gray-500">({count})</span>}
                 </button>
               )
             })}
@@ -233,7 +258,8 @@ export default function PostDetailPage() {
         </div>
 
         {/* Comments Section */}
-        <div className="card p-8">
+        <div className="mx-4 mb-4">
+          <div className="card p-6">
           <h2 className="text-xl font-bold mb-6">
             댓글 {comments.length}개
           </h2>
@@ -290,6 +316,7 @@ export default function PostDetailPage() {
               ))}
             </div>
           )}
+          </div>
         </div>
       </div>
   )
