@@ -85,7 +85,7 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
           )}
           {currentUserId === post.author_id && (
             <Link
-              href={`/posts/${post.id}/edit`}
+              href={`/main/posts/${post.id}/edit`}
               className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
@@ -96,7 +96,7 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
       </div>
 
       {/* Content */}
-      <Link href={`/posts/${post.id}`} className="block">
+      <Link href={`/main/posts/${post.id}`} className="block">
         <h3 className="text-lg font-semibold mb-2 hover:text-primary-700 transition-colors">
           {post.title}
         </h3>
@@ -163,7 +163,7 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
         </div>
 
         <Link
-          href={`/posts/${post.id}`}
+          href={`/main/posts/${post.id}`}
           className="flex items-center space-x-1 text-gray-600 hover:text-primary-700 text-sm"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

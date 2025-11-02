@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter, useParams } from 'next/navigation'
-import Layout from '@/components/Layout'
 import { getPost, updatePost } from '@/lib/api/posts'
 import { getUserChurches } from '@/lib/api/churches'
 import { getCurrentUser } from '@/lib/auth'
@@ -75,7 +74,7 @@ export default function EditPostPage() {
       // 작성자 확인
       if (postData.author_id !== user.id) {
         alert('자신의 글만 수정할 수 있습니다.')
-        router.push(`/posts/${postId}`)
+        router.push(`/main/posts/${postId}`)
         return
       }
 
@@ -91,7 +90,7 @@ export default function EditPostPage() {
     } catch (error) {
       console.error('Failed to load post:', error)
       alert('포스트를 불러올 수 없습니다.')
-      router.push('/feed')
+      router.push('/main/feed')
     } finally {
       setIsLoadingPost(false)
     }
@@ -224,7 +223,7 @@ export default function EditPostPage() {
         sermon_location: sermonLocation || undefined,
       })
 
-      router.push(`/posts/${postId}`)
+      router.push(`/main/posts/${postId}`)
     } catch (error) {
       console.error('Failed to update post:', error)
       alert('게시물 수정에 실패했습니다')
@@ -235,12 +234,10 @@ export default function EditPostPage() {
 
   if (isLoadingPost) {
     return (
-      <Layout>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
-        </div>
-      </Layout>
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">로딩 중...</p>
+      </div>
     )
   }
 
@@ -249,8 +246,7 @@ export default function EditPostPage() {
   }
 
   return (
-    <Layout>
-      <div className="max-w-3xl mx-auto">
+    <div className="p-4">
         <div className="card p-8">
           <h1 className="text-2xl font-bold mb-6">묵상 수정</h1>
 
@@ -667,8 +663,7 @@ export default function EditPostPage() {
             </div>
           </form>
         </div>
-      </div>
-    </Layout>
+    </div>
   )
 }
 

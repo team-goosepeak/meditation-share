@@ -1,4 +1,4 @@
-# Meditation Share
+# Worship Reflection
 
 설교 말씀을 중심으로 묵상과 신앙 고백을 나누는 소셜 플랫폼입니다.
 

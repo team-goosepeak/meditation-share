@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import Layout from '@/components/Layout'
 import { getPost } from '@/lib/api/posts'
 import { getComments, createComment } from '@/lib/api/comments'
 import { addReaction, ReactionType } from '@/lib/api/reactions'
@@ -49,7 +48,7 @@ export default function PostDetailPage() {
       setPost(data)
     } catch (error) {
       console.error('Failed to load post:', error)
-      router.push('/feed')
+      router.push('/main/feed')
     } finally {
       setIsLoadingPost(false)
     }
@@ -110,12 +109,10 @@ export default function PostDetailPage() {
 
   if (isLoadingPost) {
     return (
-      <Layout>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
-        </div>
-      </Layout>
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">로딩 중...</p>
+      </div>
     )
   }
 
@@ -124,8 +121,7 @@ export default function PostDetailPage() {
   }
 
   return (
-    <Layout>
-      <div className="max-w-3xl mx-auto">
+    <div className="p-4">
         {/* Post Content */}
         <div className="card p-8 mb-6">
           {/* Header */}
@@ -151,7 +147,7 @@ export default function PostDetailPage() {
               )}
               {currentUserId === post.author_id && (
                 <Link
-                  href={`/posts/${postId}/edit`}
+                  href={`/main/posts/${postId}/edit`}
                   className="text-sm px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   수정
@@ -296,7 +292,6 @@ export default function PostDetailPage() {
           )}
         </div>
       </div>
-    </Layout>
   )
 }
 

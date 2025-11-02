@@ -89,7 +89,7 @@ export default function OnboardingPage() {
       }
     } else if (step === 3) {
       // Complete onboarding
-      router.push('/feed')
+      router.push('/main/feed')
     }
   }
 
@@ -97,7 +97,7 @@ export default function OnboardingPage() {
     if (step === 2) {
       setStep(3)
     } else if (step === 3) {
-      router.push('/feed')
+      router.push('/main/feed')
     }
   }
 

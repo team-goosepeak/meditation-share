@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Layout from '@/components/Layout'
 import PostCard from '@/components/PostCard'
 import { getPosts } from '@/lib/api/posts'
 import { Post } from '@/lib/supabase'
@@ -28,8 +27,7 @@ export default function FeedPage() {
   }
 
   return (
-    <Layout>
-      <div className="max-w-3xl mx-auto">
+    <div className="p-4">
         {/* Filter Tabs */}
         <div className="mb-6 flex space-x-2 bg-white rounded-lg p-1 shadow-sm">
           <button
@@ -85,8 +83,7 @@ export default function FeedPage() {
             ))}
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   )
 }
 

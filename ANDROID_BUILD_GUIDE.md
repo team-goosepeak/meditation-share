@@ -2,7 +2,7 @@
 
 ## 📱 개요
 
-이 가이드는 Meditation Share 앱을 Android용으로 빌드하고 배포하는 방법을 설명합니다.
+이 가이드는 Worship Reflection 앱을 Android용으로 빌드하고 배포하는 방법을 설명합니다.
 
 ## 🔧 사전 요구사항
 
@@ -175,7 +175,7 @@ cd android
 
 ### 2. 앱 정보 입력
 
-- **앱 이름:** Meditation Share
+- **앱 이름:** Worship Reflection
 - **기본 언어:** 한국어
 - **앱 유형:** 앱
 - **무료/유료:** 무료

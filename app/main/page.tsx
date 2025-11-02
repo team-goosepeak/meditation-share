@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth'
 
-export default function SplashPage() {
+export default function MainPage() {
   const router = useRouter()
 
   useEffect(() => {
@@ -29,16 +29,12 @@ export default function SplashPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-700 to-primary-900">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="text-center">
-        <h1 className="text-5xl font-bold text-white mb-8">
-          리플렉션 - Worship Reflection
-        </h1>
-        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-white mx-auto"></div>
-        <p className="mt-6 text-xl text-white/80">로딩 중...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">로딩 중...</p>
       </div>
     </div>
   )
 }
-
 

@@ -1,6 +1,6 @@
-# Meditation Share API 문서
+# Worship Reflection API 문서
 
-이 문서는 Meditation Share의 API 함수들에 대한 상세한 설명입니다.
+이 문서는 Worship Reflection의 API 함수들에 대한 상세한 설명입니다.
 
 ## 목차
 

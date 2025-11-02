@@ -2,9 +2,11 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.meditationshare.app',
-  appName: 'Meditation Share',
+  appName: '리플렉션 - Worship Reflection',
   webDir: 'out',
   server: {
+    url: 'https://meditation-share.vercel.app',  // Vercel 배포 URL 사용
+    cleartext: false,
     androidScheme: 'https'
   },
   plugins: {

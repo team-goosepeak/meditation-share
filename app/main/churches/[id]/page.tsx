@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import Layout from '@/components/Layout'
 import PostCard from '@/components/PostCard'
 import { getChurch, getChurchMembers } from '@/lib/api/churches'
 import { getPosts } from '@/lib/api/posts'
@@ -43,28 +42,23 @@ export default function ChurchDetailPage() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
-        </div>
-      </Layout>
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">로딩 중...</p>
+      </div>
     )
   }
 
   if (!church) {
     return (
-      <Layout>
-        <div className="text-center py-12">
-          <p className="text-gray-600">교회를 찾을 수 없습니다</p>
-        </div>
-      </Layout>
+      <div className="text-center py-12">
+        <p className="text-gray-600">교회를 찾을 수 없습니다</p>
+      </div>
     )
   }
 
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto">
+    <div className="p-4">
         {/* Church Header */}
         <div className="card p-8 mb-6">
           <div className="flex items-start justify-between mb-4">
@@ -214,8 +208,7 @@ export default function ChurchDetailPage() {
             </dl>
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   )
 }
 

@@ -1,6 +1,6 @@
-# Meditation Share 배포 가이드
+# Worship Reflection 배포 가이드
 
-이 문서는 Meditation Share를 실제 프로덕션 환경에 배포하는 방법을 안내합니다.
+이 문서는 Worship Reflection를 실제 프로덕션 환경에 배포하는 방법을 안내합니다.
 
 ## 📋 배포 체크리스트
 
@@ -291,5 +291,5 @@ npx cap open android
 
 ---
 
-**축하합니다! 🎉 Meditation Share가 성공적으로 배포되었습니다!**
+**축하합니다! 🎉 Worship Reflection가 성공적으로 배포되었습니다!**
 

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Layout from '@/components/Layout'
 import { createChurch } from '@/lib/api/churches'
 
 export default function NewChurchPage() {
@@ -23,7 +22,7 @@ export default function NewChurchPage() {
         address: address.trim() || undefined,
         description: description.trim() || undefined,
       })
-      router.push(`/churches/${church.id}`)
+      router.push(`/main/churches/${church.id}`)
     } catch (error) {
       console.error('Failed to create church:', error)
       alert('교회 생성에 실패했습니다')
@@ -33,8 +32,7 @@ export default function NewChurchPage() {
   }
 
   return (
-    <Layout>
-      <div className="max-w-2xl mx-auto">
+    <div className="p-4">
         <div className="card p-8">
           <h1 className="text-2xl font-bold mb-6">새 교회 만들기</h1>
 
@@ -104,8 +102,7 @@ export default function NewChurchPage() {
             </div>
           </form>
         </div>
-      </div>
-    </Layout>
+    </div>
   )
 }
 

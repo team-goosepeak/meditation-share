@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Layout from '@/components/Layout'
 import { getChurches, getUserChurches, joinChurch } from '@/lib/api/churches'
 import { getCurrentUser } from '@/lib/auth'
 import { Church } from '@/lib/supabase'
@@ -60,18 +59,15 @@ export default function ChurchesPage() {
 
   if (isLoading) {
     return (
-      <Layout>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">로딩 중...</p>
-        </div>
-      </Layout>
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
+        <p className="mt-4 text-gray-600">로딩 중...</p>
+      </div>
     )
   }
 
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto">
+    <div className="p-4">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">교회</h1>
           <div className="flex space-x-3">
@@ -81,7 +77,7 @@ export default function ChurchesPage() {
             >
               초대 코드로 가입
             </button>
-            <Link href="/churches/new" className="btn-primary">
+            <Link href="/main/churches/new" className="btn-primary">
               새 교회 만들기
             </Link>
           </div>
@@ -105,7 +101,7 @@ export default function ChurchesPage() {
               {myChurches.map((church) => (
                 <Link
                   key={church.id}
-                  href={`/churches/${church.id}`}
+                  href={`/main/churches/${church.id}`}
                   className="card p-6 hover:shadow-md transition-shadow"
                 >
                   <h3 className="text-lg font-semibold mb-2">{church.name}</h3>
@@ -143,7 +139,7 @@ export default function ChurchesPage() {
                     <p className="text-sm text-gray-700 mb-4 line-clamp-2">{church.description}</p>
                   )}
                   <Link
-                    href={`/churches/${church.id}`}
+                    href={`/main/churches/${church.id}`}
                     className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                   >
                     자세히 보기 →
@@ -191,8 +187,7 @@ export default function ChurchesPage() {
             </div>
           </div>
         )}
-      </div>
-    </Layout>
+    </div>
   )
 }
 

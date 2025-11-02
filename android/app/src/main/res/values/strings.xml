@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Meditation Share</string>
-    <string name="title_activity_main">Meditation Share</string>
+    <string name="app_name">리플렉션 - Worship Reflection</string>
+    <string name="title_activity_main">리플렉션 - Worship Reflection</string>
     <string name="package_name">com.meditationshare.app</string>
     <string name="custom_url_scheme">com.meditationshare.app</string>
 </resources>

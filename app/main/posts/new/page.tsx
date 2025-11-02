@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import Layout from '@/components/Layout'
 import { createPost } from '@/lib/api/posts'
 import { getUserChurches } from '@/lib/api/churches'
 import { getCurrentUser } from '@/lib/auth'
@@ -188,7 +187,7 @@ export default function NewPostPage() {
         sermonLocation: sermonLocation || undefined,
       })
 
-      router.push('/feed')
+      router.push('/main/feed')
     } catch (error) {
       console.error('Failed to create post:', error)
       alert('게시물 작성에 실패했습니다')
@@ -198,8 +197,7 @@ export default function NewPostPage() {
   }
 
   return (
-    <Layout>
-      <div className="max-w-3xl mx-auto">
+    <div className="p-4">
         <div className="card p-8">
           <h1 className="text-2xl font-bold mb-6">새 묵상 작성</h1>
 
@@ -656,8 +654,7 @@ export default function NewPostPage() {
             </div>
           </form>
         </div>
-      </div>
-    </Layout>
+    </div>
   )
 }
 
