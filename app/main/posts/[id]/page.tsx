@@ -138,7 +138,7 @@ export default function PostDetailPage() {
   return (
     <div>
         {/* Post Header */}
-        <div className="px-4 pt-4">
+        <div className="px-6 pt-4">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-primary-200 rounded-full flex items-center justify-center">

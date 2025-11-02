@@ -8,6 +8,7 @@ import { Post } from '@/lib/supabase'
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale/ko'
 import Link from 'next/link'
+import ScriptureBadges from '@/components/ScriptureBadges'
 
 export default function JournalPage() {
   const router = useRouter()
@@ -104,18 +105,7 @@ export default function JournalPage() {
                 </h3>
 
                 {/* 성경 구절 */}
-                {post.scriptures && post.scriptures.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {post.scriptures.map((scripture, i) => (
-                      <span
-                        key={i}
-                        className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full"
-                      >
-                        📖 {scripture.book} {scripture.chapter}:{scripture.verseFrom}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <ScriptureBadges scriptures={post.scriptures || []} className="mb-2" />
 
                 {/* 내용 미리보기 */}
                 <p className="text-gray-600 text-sm line-clamp-2 mb-3">

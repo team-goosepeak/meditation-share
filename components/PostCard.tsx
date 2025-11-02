@@ -7,6 +7,7 @@ import { addReaction, ReactionType } from '@/lib/api/reactions'
 import { getCurrentUser } from '@/lib/auth'
 import { formatDistanceToNow } from 'date-fns'
 import { ko } from 'date-fns/locale/ko'
+import ScriptureBadges from '@/components/ScriptureBadges'
 
 interface PostCardProps {
   post: Post
@@ -61,7 +62,7 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
   }
 
   return (
-    <div className="card p-6 hover:shadow-md transition-shadow">
+    <div className="card p-4 hover:shadow-md transition-shadow">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
@@ -93,21 +94,9 @@ export default function PostCard({ post, onReactionUpdate }: PostCardProps) {
         </h3>
 
         {/* Scriptures */}
-        {post.scriptures && post.scriptures.length > 0 && (
-          <div className="mb-3">
-            <p className="text-sm text-gray-600">
-              {post.scriptures.map((scripture, i) => (
-                <span key={i}>
-                  {i > 0 && ' | '}
-                  {scripture.book} {scripture.chapter}:{scripture.verseFrom}
-                  {scripture.verseTo && scripture.verseTo !== scripture.verseFrom && `-${scripture.verseTo}`}
-                </span>
-              ))}
-            </p>
-          </div>
-        )}
+        <ScriptureBadges scriptures={post.scriptures || []} className="mb-3" />
 
-        <p className="text-gray-700 mb-3 line-clamp-10 whitespace-pre-wrap">{post.body}</p>
+        <p className="text-gray-700 mb-3 line-clamp-3 whitespace-pre-line">{post.body}</p>
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
