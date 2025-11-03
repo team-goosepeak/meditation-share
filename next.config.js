@@ -6,13 +6,13 @@ const nextConfig = {
     unoptimized: true,
   },
   experimental: {
-    // 빌드 추적에서 성경 데이터 파일 제외 (런타임에만 사용되므로)
+    // 빌드 추적에서 성경 데이터 파일 제외
+    // .vercelignore와 함께 사용하여 이중으로 보호
     outputFileTracingIgnores: [
       '**/supabase/bible/**',
       '**/supabase/migrations/**',
       '**/android/**',
       '**/ios/**',
-      '**/.git/**',
     ],
   },
 }
