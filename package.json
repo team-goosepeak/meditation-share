@@ -9,7 +9,8 @@
     "lint": "next lint",
     "sync:android": "npx cap sync android",
     "open:android": "npx cap open android",
-    "run:android": "npx cap run android"
+    "run:android": "npx cap run android",
+    "generate:splash": "node scripts/generate-splash.js"
   },
   "dependencies": {
     "@capacitor/android": "^6.1.2",
